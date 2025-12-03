@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat vs Dog AI Classifier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --sunflower: #FFC312;
+            --radiant-yellow: #F79F1F;
+            --warm-orange: #EE5A24;
+            --amber: #FF9F1A;
+            --golden: #FFC048;
+            --light-yellow: #FFF8E1;
+            --dark-yellow: #E67E22;
+            --cream: #FFFDE7;
+            --dark: #2C3E50;
+            --light: #ECF0F1;
+            --success: #2ECC71;
+            --info: #3498DB;
+            --warning: #F1C40F;
+            --danger: #E74C3C;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #FFFAE5 100%);
+            min-height: 100vh;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+        
+        .logo {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--radiant-yellow), var(--warm-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: var(--dark-yellow);
+            margin-bottom: 2rem;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(255, 195, 18, 0.15);
+            border: 2px solid rgba(255, 195, 18, 0.2);
+        }
+        
+        .card-title {
+            color: var(--dark-yellow);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .upload-area {
+            border: 3px dashed var(--sunflower);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--radiant-yellow);
+            background: rgba(255, 195, 18, 0.05);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--sunflower);
+            margin-bottom: 1rem;
+        }
+        
+        .preview-container {
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        #imagePreview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            border: 3px solid var(--sunflower);
+            display: none;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, var(--sunflower), var(--radiant-yellow));
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 195, 18, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 600px) {
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 248, 225, 0.9));
+            border-radius: 15px;
+            padding: 1.5rem;
+            border-left: 5px solid var(--sunflower);
+        }
+        
+        .model-name {
+            font-weight: 600;
+            color: var(--dark-yellow);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .prediction-display {
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .animal-emoji {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .prediction-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+        
+        .cat-prediction { color: var(--info); }
+        .dog-prediction { color: var(--danger); }
+        
+        .confidence-bar {
+            height: 20px;
+            background: rgba(255, 195, 18, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--sunflower), var(--radiant-yellow));
+            border-radius: 10px;
+            width: 0%;
+            transition: width 1s ease;
+        }
+        
+        .confidence-value {
+            text-align: right;
+            font-weight: 600;
+            color: var(--dark-yellow);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--sunflower);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--sunflower);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 195, 18, 0.3);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            color: var(--dark-yellow);
+            border-top: 2px solid rgba(255, 195, 18, 0.3);
+        }
+        
+        .error-message {
+            background: rgba(231, 76, 60, 0.1);
+            border-left: 5px solid var(--danger);
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo"></div>
+            <h1>AI Cat vs Dog Classifier</h1>
+            <p class="subtitle">Upload an image and let AI models predict if it's a cat or dog</p>
+        </header>
+        
+        <div class="main-grid">
+            <!-- Upload Section -->
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-cloud-upload-alt"></i> Upload Image</h2>
+                
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <h3>Click to Upload or Drag & Drop</h3>
+                    <p>JPG, PNG • Max 5MB</p>
+                </div>
+                
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                
+                <div class="preview-container">
+                    <img id="imagePreview" alt="Image Preview">
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn" id="predictBtn" onclick="predictImage()" disabled>
+                        <i class="fas fa-brain"></i> Analyze Image
+                    </button>
+                    <button class="btn" onclick="loadSampleImage()" style="background: linear-gradient(45deg, #3498DB, #2ECC71); margin-left: 10px;">
+                        <i class="fas fa-magic"></i> Try Sample
+                    </button>
+                </div>
+                
+                <!-- Loading -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>AI Models are analyzing...</p>
+                </div>
+            </div>
+            
+            <!-- Results Section -->
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-chart-line"></i> Prediction Results</h2>
+                
+                <div id="resultsContainer">
+                    <p style="text-align: center; color: var(--dark-yellow); padding: 3rem 1rem;">
+                        <i class="fas fa-robot" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        Upload an image to see predictions!
+                    </p>
+                </div>
+                
+                <!-- Chart -->
+                <div style="height: 250px; margin-top: 2rem;">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Model Stats -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-microchip"></i> Model Information</h2>
+            <div class="stats-grid" id="modelStats">
+                
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer>
+            <p>Deep Learning Project | TensorFlow + Flask</p>
+            <div style="margin-top: 1rem;">
+                <button class="btn" onclick="showSystemInfo()" style="padding: 0.5rem 1rem; font-size: 0.9rem; margin: 0 5px;">
+                    <i class="fas fa-info-circle"></i> System Info
+                </button>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <script>
+        // DOM Elements
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const imagePreview = document.getElementById('imagePreview');
+        const predictBtn = document.getElementById('predictBtn');
+        const loading = document.getElementById('loading');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const modelStats = document.getElementById('modelStats');
+        
+        let comparisonChart = null;
+        
+        // Drag and Drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--radiant-yellow)';
+            uploadArea.style.background = 'rgba(255, 195, 18, 0.1)';
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'var(--sunflower)';
+            uploadArea.style.background = '';
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'var(--sunflower)';
+            uploadArea.style.background = '';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+        
+        function handleFileSelect(file) {
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('File too large (max 5MB)', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                imagePreview.src = event.target.result;
+                imagePreview.style.display = 'block';
+                predictBtn.disabled = false;
+                
+                resultsContainer.innerHTML = `
+                    <p style="text-align: center; color: var(--dark-yellow); padding: 2rem 1rem;">
+                        <i class="fas fa-play-circle" style="font-size: 1.5rem; margin-bottom: 1rem; display: block;"></i>
+                        Click "Analyze Image" to begin
+                    </p>
+                `;
+                
+                if (comparisonChart) {
+                    comparisonChart.destroy();
+                    comparisonChart = null;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Load sample image
+        function loadSampleImage() {
+            const samples = [
+                'https://images.unsplash.com/photo-1514888286974-6d03bde4ba42?w=300&h=300&fit=crop', // Cat
+                'https://images.unsplash.com/photo-1552053831-71594a27632d?w=300&h=300&fit=crop'  // Dog
+            ];
+            
+            imagePreview.src = samples[Math.floor(Math.random() * samples.length)];
+            imagePreview.style.display = 'block';
+            predictBtn.disabled = false;
+            showNotification('Sample image loaded!', 'success');
+        }
+        
+        // Predict image
+        async function predictImage() {
+            const file = fileInput.files[0];
+            if (!file) {
+                showNotification('Please upload an image first', 'error');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            predictBtn.disabled = true;
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data);
+                    updateChart(data);
+                    showNotification('Analysis complete!', 'success');
+                } else {
+                    showNotification('Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+            } finally {
+                loading.style.display = 'none';
+                predictBtn.disabled = false;
+            }
+        }
+        
+        // Display results
+        function displayResults(data) {
+            const simple = data.predictions.simple_cnn;
+            const transfer = data.predictions.transfer_learning;
+            
+            let resultsHTML = '<div class="results-container">';
+            
+            // Simple CNN result
+            resultsHTML += `
+                <div class="result-card">
+                    <div class="model-name">
+                        <i class="fas fa-brain"></i> Simple CNN
+                    </div>`;
+            
+            if (simple.error) {
+                resultsHTML += `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        ${simple.error}
+                    </div>`;
+            } else {
+                resultsHTML += `
+                    <div class="prediction-display">
+                        <div class="animal-emoji">${simple.class_emoji}</div>
+                        <div class="prediction-text ${simple.class.toLowerCase()}-prediction">
+                            ${simple.class}
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${simple.confidence * 100}%"></div>
+                        </div>
+                        <div class="confidence-value">${(simple.confidence * 100).toFixed(2)}%</div>
+                        <p><small>${(data.processing_times.simple_cnn * 1000).toFixed(0)}ms</small></p>
+                    </div>`;
+            }
+            
+            resultsHTML += '</div>';
+            
+            // Transfer Learning result
+            resultsHTML += `
+                <div class="result-card">
+                    <div class="model-name">
+                        <i class="fas fa-rocket"></i> MobileNetV2
+                    </div>`;
+            
+            if (transfer.error) {
+                resultsHTML += `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        ${transfer.error}
+                    </div>`;
+            } else {
+                resultsHTML += `
+                    <div class="prediction-display">
+                        <div class="animal-emoji">${transfer.class_emoji}</div>
+                        <div class="prediction-text ${transfer.class.toLowerCase()}-prediction">
+                            ${transfer.class}
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${transfer.confidence * 100}%"></div>
+                        </div>
+                        <div class="confidence-value">${(transfer.confidence * 100).toFixed(2)}%</div>
+                        <p><small>${(data.processing_times.transfer_learning * 1000).toFixed(0)}ms</small></p>
+                        ${transfer.model_status && transfer.model_status.includes('Dummy') ? 
+                          '<p style="color: var(--warning); font-size: 0.8rem;"><i class="fas fa-exclamation-circle"></i> Using untrained model</p>' : ''}
+                    </div>`;
+            }
+            
+            resultsHTML += '</div></div>';
+            
+            resultsHTML += `
+                <div style="text-align: center; margin-top: 1rem; padding: 1rem; background: rgba(255, 195, 18, 0.1); border-radius: 10px;">
+                    <p><i class="fas fa-clock"></i> Total time: ${(data.total_time * 1000).toFixed(0)}ms</p>
+                    <p><i class="fas fa-calendar"></i> ${data.timestamp}</p>
+                </div>`;
+            
+            resultsContainer.innerHTML = resultsHTML;
+        }
+        
+        // Update chart
+        function updateChart(data) {
+            const simple = data.predictions.simple_cnn;
+            const transfer = data.predictions.transfer_learning;
+            
+            if (simple.error || transfer.error) {
+                if (comparisonChart) {
+                    comparisonChart.destroy();
+                    comparisonChart = null;
+                }
+                return;
+            }
+            
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            
+            if (comparisonChart) {
+                comparisonChart.destroy();
+            }
+            
+            comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Simple CNN', 'MobileNetV2'],
+                    datasets: [{
+                        label: 'Confidence',
+                        data: [simple.confidence * 100, transfer.confidence * 100],
+                        backgroundColor: [
+                            'rgba(255, 195, 18, 0.7)',
+                            'rgba(247, 159, 31, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 195, 18, 1)',
+                            'rgba(247, 159, 31, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Load model stats
+        async function loadModelStats() {
+            try {
+                const response = await fetch('/api/model-stats');
+                const stats = await response.json();
+                
+                modelStats.innerHTML = `
+                    <div class="stat-card">
+                        <h3>${stats.simple_cnn.name}</h3>
+                        <p>${stats.simple_cnn.description}</p>
+                        <p><strong>Parameters:</strong> ${stats.simple_cnn.parameters}</p>
+                        <p><strong>Status:</strong> ${stats.simple_cnn.status}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${stats.transfer_learning.name}</h3>
+                        <p>${stats.transfer_learning.description}</p>
+                        <p><strong>Parameters:</strong> ${stats.transfer_learning.parameters}</p>
+                        <p><strong>Status:</strong> ${stats.transfer_learning.status}</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Failed to load model stats:', error);
+            }
+        }
+        
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}" 
+                       style="color: ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--sunflower)'};"></i>
+                    <div>${message}</div>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // Utility functions
+        async function showSystemInfo() {
+            try {
+                const response = await fetch('/api/system-info');
+                const data = await response.json();
+                
+                alert(`System Information:\n\n` +
+                      `TensorFlow: ${data.tensorflow_version}\n` +
+                      `Python: ${data.python_version}\n` +
+                      `System: ${data.system}\n` +
+                      `Processor: ${data.processor}\n\n` +
+                      `Models Loaded:\n` +
+                      `• Simple CNN: ${data.models_loaded.simple_cnn ? 'Yes' : 'No'}\n` +
+                      `• Transfer Learning: ${data.models_loaded.transfer_learning ? 'Yes' : 'No'}`);
+            } catch (error) {
+                showNotification('Failed to get system info', 'error');
+            }
+        }
+        
+        async function reloadModels() {
+            try {
+                const response = await fetch('/api/reload-models');
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Models reloaded successfully!', 'success');
+                    loadModelStats();
+                } else {
+                    showNotification('Failed to reload models', 'error');
+                }
+            } catch (error) {
+                showNotification('Error reloading models', 'error');
+            }
+        }
+        
+        // Initialize
+        window.onload = function() {
+            loadModelStats();
+            showNotification('Welcome to Cat vs Dog Classifier!', 'success');
+        };
+    </script>
+</body>
+</html>
